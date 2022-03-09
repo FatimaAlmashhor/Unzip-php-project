@@ -19,14 +19,10 @@
              $check = true ;
          break;
      }
-    //  if($ext !== 'zip')
-    //  {
-    //      $message = ''
-    //  }
-    // $path = dirname(__FILE__).'/';
-    $new_file_name =time().".".$ext ;
-    $targetzip = $upload. $new_file_name; // target zip file
-    print_r($targetzip);
+
+    $new_file_name = time() ;
+    $targetzip = $upload. $new_file_name .".".$ext; // target zip file
+    // print_r($targetzip);
     if(move_uploaded_file($source, $targetzip)) {
         if($ext == 'zip'){
             $zip = new ZipArchive;
@@ -66,21 +62,84 @@
             }
             else
             {
-                echo 'here we go';
-                $test = $zip->extractTo($upload."/"); // place in the directory with same name  
+                $foldername = $upload . '/'. $new_file_name ;
+                mkdir($foldername) ;
+
+                $test = $zip->extractTo($foldername); // place in the directory with same name  
                 $zip->close();
-        
+                $a = scandir($foldername);
+                foreach($a as $file){
+                   
+                    if($file =='.' || $file =='..'){
+                        continue ;
+                    }
+                    else{
+                        $name_part= explode("." ,$file);
+                        $ext =end($name_part);
+                        if($ext =='mp4'){
+                            ?>
+                                 <video width="320" height="240" controls>
+                                    <source src="
+                                        <?php 
+                                            echo ($foldername .'/'. $file);
+                                        ?>        
+                                    "
+                            
+                                    type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video> 
+                            <?php
+                        }
+                        if($ext =='jpg' || $ext =='png' || $ext =='jepg' || $ext =='jfif'){
+                    
+                            ?>
+                            <img width="320" height="240"
+                               src="
+                                   <?php 
+                                       echo ($foldername .'/'. $file);
+                                   ?>        
+                               "
+                           /> 
+                       <?php
+                        }
+                        if($ext =='mp3' || $ext =='m4a'){
+                            ?>
+                             <audio controls>
+                             <source src="
+                                   <?php 
+                                       echo ($foldername .'/'. $file);
+                                   ?>        
+                               "
+                             type="audio/mp3"></source>
+                                </audio> 
+                               <?php
+                        }
+                        if($ext =='pdf' || $ext =='docx' ||$ext =='doc'){
+                            ?>
+                            <a width="320" height="240"
+                               href="
+                                   <?php 
+                                       echo ($foldername .'/'. $file);
+                                   ?>        
+                               "
+                           >
+                        <?php 
+                        echo $file;
+                        ?>
+                        </a> 
+                       <?php
+                        }
+                       
+
+                    }
+                }
+               
                 unlink($targetzip);
             } 
         }
-        else if( $ext == 'rar'){
+        else {
             
-            $archive = RarArchive::open($targetzip);
-            $entries = $archive->getEntries();
-            foreach ($entries as $entry) {
-              $entry->extract($upload."/");
-            }
-            $archive->close();
+           $message = '';
         }
     }
  }
